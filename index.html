@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced GPA Calculator - 4.0, 10.0, Percentage & More</title>
+    <title>Advanced GPA Calculator - 4.0, 10.0, Percentage & CGPA Converter</title>
     <style>
         /* styles.css */
         * {
@@ -396,6 +396,23 @@
             transform: translateY(0);
             opacity: 1;
         }
+        /* CGPA Info Box */
+        .cgpa-info {
+            background: #e0f2fe;
+            border: 1px solid #0288d1;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .cgpa-info h4 {
+            color: #0277bd;
+            margin-bottom: 10px;
+        }
+        .cgpa-info p {
+            color: #01579b;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -509,13 +526,15 @@
         <!-- Converter Tab -->
         <div id="converter-tab" class="tab-content">
             <h2 style="margin-bottom: 20px;">Grade Converter</h2>
-            <p style="color: #6b7280; margin-bottom: 30px;">Convert between different grading systems</p>
+            <p style="color: #6b7280; margin-bottom: 30px;">Convert between different grading systems including CGPA</p>
             <div class="converter-section">
                 <div class="converter-box">
                     <h3>From</h3>
                     <select id="from-system" onchange="updateConversion()" style="width: 100%; margin-bottom: 10px;">
                         <option value="4.0">4.0 Scale</option>
                         <option value="10.0">10.0 Scale</option>
+                        <option value="cgpa-10">CGPA (10.0 Scale)</option>
+                        <option value="cgpa-4">CGPA (4.0 Scale)</option>
                         <option value="percentage">Percentage</option>
                         <option value="letter">Letter Grade</option>
                     </select>
@@ -528,11 +547,22 @@
                         <option value="percentage">Percentage</option>
                         <option value="4.0">4.0 Scale</option>
                         <option value="10.0">10.0 Scale</option>
+                        <option value="cgpa-10">CGPA (10.0 Scale)</option>
+                        <option value="cgpa-4">CGPA (4.0 Scale)</option>
                         <option value="letter">Letter Grade</option>
                     </select>
                     <div class="converter-value" id="converted-value">--</div>
                 </div>
             </div>
+            
+            <div class="cgpa-info">
+                <h4>CGPA Conversion Information</h4>
+                <p><strong>Standard Formula:</strong> Percentage = CGPA × 9.5 (Most Indian universities)</p>
+                <p><strong>Alternative:</strong> Some universities use CGPA × 10</p>
+                <p><strong>CGPA to 4.0 Scale:</strong> (CGPA ÷ 10) × 4</p>
+                <p><strong>Note:</strong> Different universities may have slightly different conversion formulas</p>
+            </div>
+            
             <div class="grade-scale-info">
                 <div class="grade-scale-title">Conversion Table</div>
                 <table style="width: 100%; border-collapse: collapse;">
@@ -541,6 +571,7 @@
                             <th style="padding: 10px; text-align: left;">Letter Grade</th>
                             <th style="padding: 10px; text-align: center;">4.0 Scale</th>
                             <th style="padding: 10px; text-align: center;">10.0 Scale</th>
+                            <th style="padding: 10px; text-align: center;">CGPA (10.0)</th>
                             <th style="padding: 10px; text-align: center;">Percentage</th>
                         </tr>
                     </thead>
@@ -573,15 +604,15 @@
         };
 
         const conversionTable = [
-            { letter: 'A+/A', fourScale: '4.0', tenScale: '9-10', percentage: '90-100%' },
-            { letter: 'A-', fourScale: '3.7', tenScale: '8.5', percentage: '85-89%' },
-            { letter: 'B+', fourScale: '3.3', tenScale: '8.0', percentage: '80-84%' },
-            { letter: 'B', fourScale: '3.0', tenScale: '7.0-7.5', percentage: '70-79%' },
-            { letter: 'B-', fourScale: '2.7', tenScale: '6.5', percentage: '65-69%' },
-            { letter: 'C+', fourScale: '2.3', tenScale: '6.0', percentage: '60-64%' },
-            { letter: 'C', fourScale: '2.0', tenScale: '5.0-5.5', percentage: '50-59%' },
-            { letter: 'D', fourScale: '1.0', tenScale: '4.0', percentage: '40-49%' },
-            { letter: 'F', fourScale: '0', tenScale: '0', percentage: '<40%' }
+            { letter: 'A+/A', fourScale: '4.0', tenScale: '9-10', cgpa: '9-10', percentage: '90-100%' },
+            { letter: 'A-', fourScale: '3.7', tenScale: '8.5', cgpa: '8.5', percentage: '85-89%' },
+            { letter: 'B+', fourScale: '3.3', tenScale: '8.0', cgpa: '8.0', percentage: '80-84%' },
+            { letter: 'B', fourScale: '3.0', tenScale: '7.0-7.5', cgpa: '7.0-7.5', percentage: '70-79%' },
+            { letter: 'B-', fourScale: '2.7', tenScale: '6.5', cgpa: '6.5', percentage: '65-69%' },
+            { letter: 'C+', fourScale: '2.3', tenScale: '6.0', cgpa: '6.0', percentage: '60-64%' },
+            { letter: 'C', fourScale: '2.0', tenScale: '5.0-5.5', cgpa: '5.0-5.5', percentage: '50-59%' },
+            { letter: 'D', fourScale: '1.0', tenScale: '4.0', cgpa: '4.0', percentage: '40-49%' },
+            { letter: 'F', fourScale: '0', tenScale: '0', cgpa: '0', percentage: '<40%' }
         ];
 
         function switchSystem(btn, system) {
@@ -956,7 +987,7 @@
             whatIfCourses.forEach(c => c.grade = '');
         }
 
-        // Grade Converter
+        // Grade Converter with CGPA support
         function updateConversion() {
             const fromSystem = document.getElementById('from-system').value;
             const toSystem = document.getElementById('to-system').value;
@@ -970,74 +1001,138 @@
             let convertedValue = '--';
             let numericFrom = parseFloat(fromValue);
 
+            // From 4.0 Scale conversions
             if (fromSystem === '4.0' && !isNaN(numericFrom)) {
                 if (toSystem === '10.0') {
+                    convertedValue = (numericFrom * 2.5).toFixed(2);
+                } else if (toSystem === 'cgpa-10') {
+                    convertedValue = (numericFrom * 2.5).toFixed(2);
+                } else if (toSystem === 'cgpa-4') {
+                    convertedValue = numericFrom.toFixed(2);
+                } else if (toSystem === 'percentage') {
+                    convertedValue = ((numericFrom / 4.0) * 100).toFixed(1) + '%';
+                } else if (toSystem === 'letter') {
+                    convertedValue = getLetterGrade(numericFrom, '4.0');
+                }
+            }
+            
+            // From 10.0 Scale conversions
+            else if (fromSystem === '10.0' && !isNaN(numericFrom)) {
+                if (toSystem === '4.0') {
+                    convertedValue = (numericFrom / 2.5).toFixed(2);
+                } else if (toSystem === 'cgpa-10') {
+                    convertedValue = numericFrom.toFixed(2);
+                } else if (toSystem === 'cgpa-4') {
+                    convertedValue = (numericFrom / 2.5).toFixed(2);
+                } else if (toSystem === 'percentage') {
+                    convertedValue = (numericFrom * 9.5).toFixed(1) + '%';
+                } else if (toSystem === 'letter') {
+                    convertedValue = getLetterGrade(numericFrom, '10.0');
+                }
+            }
+            
+            // From CGPA (10.0 Scale) conversions
+            else if (fromSystem === 'cgpa-10' && !isNaN(numericFrom)) {
+                if (toSystem === '4.0') {
+                    convertedValue = ((numericFrom / 10) * 4).toFixed(2);
+                } else if (toSystem === '10.0') {
+                    convertedValue = numericFrom.toFixed(2);
+                } else if (toSystem === 'cgpa-4') {
+                    convertedValue = ((numericFrom / 10) * 4).toFixed(2);
+                } else if (toSystem === 'percentage') {
+                    convertedValue = (numericFrom * 9.5).toFixed(1) + '%';
+                } else if (toSystem === 'letter') {
+                    convertedValue = getLetterGrade(numericFrom, '10.0');
+                }
+            }
+            
+            // From CGPA (4.0 Scale) conversions
+            else if (fromSystem === 'cgpa-4' && !isNaN(numericFrom)) {
+                if (toSystem === '4.0') {
+                    convertedValue = numericFrom.toFixed(2);
+                } else if (toSystem === '10.0') {
+                    convertedValue = (numericFrom * 2.5).toFixed(2);
+                } else if (toSystem === 'cgpa-10') {
                     convertedValue = (numericFrom * 2.5).toFixed(2);
                 } else if (toSystem === 'percentage') {
                     convertedValue = ((numericFrom / 4.0) * 100).toFixed(1) + '%';
                 } else if (toSystem === 'letter') {
-                    if (numericFrom >= 4.0) convertedValue = 'A+';
-                    else if (numericFrom >= 3.7) convertedValue = 'A-';
-                    else if (numericFrom >= 3.3) convertedValue = 'B+';
-                    else if (numericFrom >= 3.0) convertedValue = 'B';
-                    else if (numericFrom >= 2.7) convertedValue = 'B-';
-                    else if (numericFrom >= 2.3) convertedValue = 'C+';
-                    else if (numericFrom >= 2.0) convertedValue = 'C';
-                    else if (numericFrom >= 1.0) convertedValue = 'D';
-                    else convertedValue = 'F';
+                    convertedValue = getLetterGrade(numericFrom, '4.0');
                 }
-            } else if (fromSystem === '10.0' && !isNaN(numericFrom)) {
-                if (toSystem === '4.0') {
-                    convertedValue = (numericFrom / 2.5).toFixed(2);
-                } else if (toSystem === 'percentage') {
-                    convertedValue = (numericFrom * 10).toFixed(1) + '%';
-                } else if (toSystem === 'letter') {
-                    if (numericFrom >= 9) convertedValue = 'A+';
-                    else if (numericFrom >= 8.5) convertedValue = 'A-';
-                    else if (numericFrom >= 8) convertedValue = 'B+';
-                    else if (numericFrom >= 7) convertedValue = 'B';
-                    else if (numericFrom >= 6.5) convertedValue = 'B-';
-                    else if (numericFrom >= 6) convertedValue = 'C+';
-                    else if (numericFrom >= 5) convertedValue = 'C';
-                    else if (numericFrom >= 4) convertedValue = 'D';
-                    else convertedValue = 'F';
-                }
-            } else if (fromSystem === 'percentage' && !isNaN(numericFrom)) {
+            }
+            
+            // From Percentage conversions
+            else if (fromSystem === 'percentage' && !isNaN(numericFrom)) {
                 if (toSystem === '4.0') {
                     convertedValue = ((numericFrom / 100) * 4.0).toFixed(2);
                 } else if (toSystem === '10.0') {
-                    convertedValue = (numericFrom / 10).toFixed(2);
+                    convertedValue = (numericFrom / 9.5).toFixed(2);
+                } else if (toSystem === 'cgpa-10') {
+                    convertedValue = (numericFrom / 9.5).toFixed(2);
+                } else if (toSystem === 'cgpa-4') {
+                    convertedValue = ((numericFrom / 100) * 4.0).toFixed(2);
                 } else if (toSystem === 'letter') {
-                    if (numericFrom >= 90) convertedValue = 'A+';
-                    else if (numericFrom >= 85) convertedValue = 'A-';
-                    else if (numericFrom >= 80) convertedValue = 'B+';
-                    else if (numericFrom >= 70) convertedValue = 'B';
-                    else if (numericFrom >= 65) convertedValue = 'B-';
-                    else if (numericFrom >= 60) convertedValue = 'C+';
-                    else if (numericFrom >= 50) convertedValue = 'C';
-                    else if (numericFrom >= 40) convertedValue = 'D';
-                    else convertedValue = 'F';
+                    convertedValue = getLetterGradeFromPercentage(numericFrom);
                 }
-            } else if (fromSystem === 'letter') {
+            }
+            
+            // From Letter Grade conversions
+            else if (fromSystem === 'letter') {
                 const letterMap = {
-                    'A+': { '4.0': 4.0, '10.0': 10, 'percentage': '95%' },
-                    'A': { '4.0': 4.0, '10.0': 9, 'percentage': '90%' },
-                    'A-': { '4.0': 3.7, '10.0': 8.5, 'percentage': '87%' },
-                    'B+': { '4.0': 3.3, '10.0': 8, 'percentage': '83%' },
-                    'B': { '4.0': 3.0, '10.0': 7, 'percentage': '75%' },
-                    'B-': { '4.0': 2.7, '10.0': 6.5, 'percentage': '70%' },
-                    'C+': { '4.0': 2.3, '10.0': 6, 'percentage': '67%' },
-                    'C': { '4.0': 2.0, '10.0': 5, 'percentage': '60%' },
-                    'D': { '4.0': 1.0, '10.0': 4, 'percentage': '50%' },
-                    'F': { '4.0': 0, '10.0': 0, 'percentage': '0%' }
+                    'A+': { '4.0': 4.0, '10.0': 10, 'cgpa-10': 10, 'cgpa-4': 4.0, 'percentage': '95%' },
+                    'A': { '4.0': 4.0, '10.0': 9, 'cgpa-10': 9, 'cgpa-4': 4.0, 'percentage': '90%' },
+                    'A-': { '4.0': 3.7, '10.0': 8.5, 'cgpa-10': 8.5, 'cgpa-4': 3.7, 'percentage': '87%' },
+                    'B+': { '4.0': 3.3, '10.0': 8, 'cgpa-10': 8, 'cgpa-4': 3.3, 'percentage': '83%' },
+                    'B': { '4.0': 3.0, '10.0': 7, 'cgpa-10': 7, 'cgpa-4': 3.0, 'percentage': '75%' },
+                    'B-': { '4.0': 2.7, '10.0': 6.5, 'cgpa-10': 6.5, 'cgpa-4': 2.7, 'percentage': '70%' },
+                    'C+': { '4.0': 2.3, '10.0': 6, 'cgpa-10': 6, 'cgpa-4': 2.3, 'percentage': '67%' },
+                    'C': { '4.0': 2.0, '10.0': 5, 'cgpa-10': 5, 'cgpa-4': 2.0, 'percentage': '60%' },
+                    'D': { '4.0': 1.0, '10.0': 4, 'cgpa-10': 4, 'cgpa-4': 1.0, 'percentage': '50%' },
+                    'F': { '4.0': 0, '10.0': 0, 'cgpa-10': 0, 'cgpa-4': 0, 'percentage': '0%' }
                 };
                 
-                if (letterMap[fromValue] && letterMap[fromValue][toSystem]) {
+                if (letterMap[fromValue] && letterMap[fromValue][toSystem] !== undefined) {
                     convertedValue = letterMap[fromValue][toSystem];
                 }
             }
 
             document.getElementById('converted-value').textContent = convertedValue;
+        }
+
+        function getLetterGrade(value, scale) {
+            if (scale === '4.0') {
+                if (value >= 4.0) return 'A+';
+                else if (value >= 3.7) return 'A-';
+                else if (value >= 3.3) return 'B+';
+                else if (value >= 3.0) return 'B';
+                else if (value >= 2.7) return 'B-';
+                else if (value >= 2.3) return 'C+';
+                else if (value >= 2.0) return 'C';
+                else if (value >= 1.0) return 'D';
+                else return 'F';
+            } else if (scale === '10.0') {
+                if (value >= 9) return 'A+';
+                else if (value >= 8.5) return 'A-';
+                else if (value >= 8) return 'B+';
+                else if (value >= 7) return 'B';
+                else if (value >= 6.5) return 'B-';
+                else if (value >= 6) return 'C+';
+                else if (value >= 5) return 'C';
+                else if (value >= 4) return 'D';
+                else return 'F';
+            }
+        }
+
+        function getLetterGradeFromPercentage(percentage) {
+            if (percentage >= 90) return 'A+';
+            else if (percentage >= 85) return 'A-';
+            else if (percentage >= 80) return 'B+';
+            else if (percentage >= 70) return 'B';
+            else if (percentage >= 65) return 'B-';
+            else if (percentage >= 60) return 'C+';
+            else if (percentage >= 50) return 'C';
+            else if (percentage >= 40) return 'D';
+            else return 'F';
         }
 
         function populateConversionTable() {
@@ -1050,6 +1145,7 @@
                         <td style="padding: 10px;">${row.letter}</td>
                         <td style="padding: 10px; text-align: center;">${row.fourScale}</td>
                         <td style="padding: 10px; text-align: center;">${row.tenScale}</td>
+                        <td style="padding: 10px; text-align: center;">${row.cgpa}</td>
                         <td style="padding: 10px; text-align: center;">${row.percentage}</td>
                     </tr>
                 `;
