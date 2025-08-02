@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced GPA Calculator - 4.0, 10.0, Percentage & More</title>
+    <style>
+        /* styles.css */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --border: #e5e7eb;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .system-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--white);
+            background: transparent;
+            color: var(--white);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .toggle-btn.active {
+            background: var(--white);
+            color: var(--primary);
+        }
+        .nav-tabs {
+            display: flex;
+            background: var(--light);
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .nav-tab.active {
+            color: var(--primary);
+            background: var(--white);
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .gpa-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .gpa-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+        .gpa-value {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+        }
+        .gpa-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        .semester-section {
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .semester-header {
+            background: var(--light);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .semester-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .semester-gpa {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .courses-list {
+            padding: 20px;
+        }
+        .course-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .remove-btn {
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        .add-btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .add-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .add-btn.secondary {
+            background: var(--info);
+        }
+        .add-btn.secondary:hover {
+            background: #2563eb;
+        }
+        .grade-scale-info {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .grade-scale-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        .grade-scale-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .grade-item {
+            background: var(--white);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .grade-letter {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .grade-points {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        /* Target GPA Calculator Styles */
+        .target-calculator {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .target-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .target-result {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid var(--primary);
+        }
+        .target-result h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        /* Converter Styles */
+        .converter-section {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .converter-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        .converter-box {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .converter-box h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        .converter-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .action-btn:hover {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            .course-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .gpa-value {
+                font-size: 3rem;
+            }
+            .converter-section {
+                grid-template-columns: 1fr;
+            }
+            .converter-arrow {
+                transform: rotate(90deg);
+            }
+            .nav-tabs {
+                overflow-x: scroll;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Advanced GPA Calculator</h1>
+            <p>Calculate, Convert & Plan Your Academic Performance</p>
+            <div class="system-toggle">
+                <button class="toggle-btn active" onclick="switchSystem(this, '4.0')">4.0 Scale</button>
+                <button class="toggle-btn" onclick="switchSystem(this, '10.0-letter')">10.0 Scale (Letters)</button>
+                <button class="toggle-btn" onclick="switchSystem(this, '10.0-number')">10.0 Scale (Numbers)</button>
+                <button class="toggle-btn" onclick="switchSystem(this, 'percentage')">Percentage</button>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab(this, 'calculator')">GPA Calculator</button>
+            <button class="nav-tab" onclick="switchTab(this, 'analytics')">Analytics</button>
+            <button class="nav-tab" onclick="switchTab(this, 'target')">Target GPA</button>
+            <button class="nav-tab" onclick="switchTab(this, 'converter')">Grade Converter</button>
+        </div>
+        <!-- Main Calculator Tab -->
+        <div id="calculator-tab" class="tab-content active">
+            <div class="quick-actions">
+                <button class="action-btn" onclick="saveCalculation()">💾 Save</button>
+                <button class="action-btn" onclick="loadFromLocalStorage()">📁 Load</button>
+                <button class="action-btn" onclick="resetAll()">🔄 Reset</button>
+            </div>
+            <div class="gpa-display">
+                <div class="gpa-label">Your Current GPA</div>
+                <div class="gpa-value" id="overall-gpa">0.00</div>
+                <div class="gpa-label" id="gpa-suffix">out of 4.00</div>
+            </div>
+            <div id="semesters-container">
+                <!-- Semesters will be added here dynamically -->
+            </div>
+            <button class="add-btn" onclick="addSemester()">+ Add New Semester</button>
+            <div class="grade-scale-info">
+                <div class="grade-scale-title">Grade Scale Reference</div>
+                <div class="grade-scale-grid" id="grade-scale">
+                    <!-- Grade scale will be populated based on system -->
+                </div>
+            </div>
+        </div>
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Performance Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-credits">0</div>
+                    <div class="stat-label">Total Credits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-credits">0</div>
+                    <div class="stat-label">Avg Credits/Sem</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="best-sem">-</div>
+                    <div class="stat-label">Best Semester</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="grade-trend">-</div>
+                    <div class="stat-label">Trend</div>
+                </div>
+            </div>
+            <div style="background: var(--light); border-radius: 10px; padding: 20px; margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">Grade Distribution</h3>
+                <div id="grade-distribution">
+                    <!-- Grade distribution will be shown here -->
+                </div>
+            </div>
+        </div>
+        <!-- Target GPA Tab -->
+        <div id="target-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Target GPA Calculator</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">Calculate what grades you need to achieve your target GPA</p>
+            <div class="target-calculator">
+                <div class="target-inputs">
+                    <div class="input-group">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current GPA</label>
+                        <input type="number" id="current-gpa-target" step="0.01" placeholder="3.50">
+                    </div>
+                    <div class="input-group">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Credits Completed</label>
+                        <input type="number" id="current-credits" placeholder="60">
+                    </div>
+                    <div class="input-group">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Target GPA</label>
+                        <input type="number" id="target-gpa" step="0.01" placeholder="3.70">
+                    </div>
+                    <div class="input-group">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Additional Credits</label>
+                        <input type="number" id="additional-credits" placeholder="30">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="calculateTargetGPA()">Calculate Required GPA</button>
+                <div id="target-result" class="target-result" style="display: none;">
+                    <h3>Results</h3>
+                    <p id="target-message"></p>
+                </div>
+            </div>
+            <div class="target-calculator" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">What-If Analysis</h3>
+                <p style="color: #6b7280; margin-bottom: 20px;">See how different grades affect your GPA</p>
+                <div id="what-if-courses">
+                    <!-- What-if courses will be added here -->
+                </div>
+                <button class="add-btn secondary" onclick="addWhatIfCourse()">+ Add Course</button>
+                <div id="projected-gpa" style="margin-top: 20px; font-size: 1.2rem; font-weight: 600; color: var(--primary);"></div>
+            </div>
+        </div>
+        <!-- Converter Tab -->
+        <div id="converter-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Grade Converter</h2>
+            <p style="color: #6b7280; margin-bottom: 30px;">Convert between different grading systems</p>
+            <div class="converter-section">
+                <div class="converter-box">
+                    <h3>From</h3>
+                    <select id="from-system" onchange="updateConversion()" style="width: 100%; margin-bottom: 10px;">
+                        <option value="4.0">4.0 Scale</option>
+                        <option value="10.0">10.0 Scale</option>
+                        <option value="percentage">Percentage</option>
+                        <option value="letter">Letter Grade</option>
+                    </select>
+                    <input type="text" id="from-value" placeholder="Enter value" oninput="updateConversion()" style="width: 100%; text-align: center; font-size: 1.2rem;">
+                </div>
+                <div class="converter-arrow">→</div>
+                <div class="converter-box">
+                    <h3>To</h3>
+                    <select id="to-system" onchange="updateConversion()" style="width: 100%; margin-bottom: 10px;">
+                        <option value="percentage">Percentage</option>
+                        <option value="4.0">4.0 Scale</option>
+                        <option value="10.0">10.0 Scale</option>
+                        <option value="letter">Letter Grade</option>
+                    </select>
+                    <div class="converter-value" id="converted-value">--</div>
+                </div>
+            </div>
+            <div class="grade-scale-info">
+                <div class="grade-scale-title">Conversion Table</div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--light);">
+                            <th style="padding: 10px; text-align: left;">Letter Grade</th>
+                            <th style="padding: 10px; text-align: center;">4.0 Scale</th>
+                            <th style="padding: 10px; text-align: center;">10.0 Scale</th>
+                            <th style="padding: 10px; text-align: center;">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="conversion-table">
+                        <!-- Conversion table will be populated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // script.js
+        let currentSystem = '4.0';
+        let semesters = [];
+        let semesterCount = 0;
+        let whatIfCourses = [];
+
+        const gradeScales = {
+            '4.0': {
+                'A+': 4.0, 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+                'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0
+            },
+            '10.0-letter': {
+                'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0
+            },
+            '10.0-number': {}, // Not used since numeric input
+            'percentage': {} // Not used since numeric input
+        };
+
+        const conversionTable = [
+            { letter: 'A+/A', fourScale: '4.0', tenScale: '9-10', percentage: '90-100%' },
+            { letter: 'A-', fourScale: '3.7', tenScale: '8.5', percentage: '85-89%' },
+            { letter: 'B+', fourScale: '3.3', tenScale: '8.0', percentage: '80-84%' },
+            { letter: 'B', fourScale: '3.0', tenScale: '7.0-7.5', percentage: '70-79%' },
+            { letter: 'B-', fourScale: '2.7', tenScale: '6.5', percentage: '65-69%' },
+            { letter: 'C+', fourScale: '2.3', tenScale: '6.0', percentage: '60-64%' },
+            { letter: 'C', fourScale: '2.0', tenScale: '5.0-5.5', percentage: '50-59%' },
+            { letter: 'D', fourScale: '1.0', tenScale: '4.0', percentage: '40-49%' },
+            { letter: 'F', fourScale: '0', tenScale: '0', percentage: '<40%' }
+        ];
+
+        function switchSystem(btn, system) {
+            currentSystem = system;
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            let suffix = 'out of 4.00';
+            if (system.startsWith('10.0')) {
+                suffix = 'out of 10.00';
+            } else if (system === 'percentage') {
+                suffix = 'Percentage';
+            }
+            document.getElementById('gpa-suffix').textContent = suffix;
+
+            updateGradeScale();
+            updateAllGradeInputs();
+            updateWhatIfInputs();
+            calculateOverallGPA();
+        }
+
+        function switchTab(btn, tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            if (tabName === 'analytics') {
+                updateAnalytics();
+            } else if (tabName === 'converter') {
+                populateConversionTable();
+            }
+        }
+
+        function updateGradeScale() {
+            const scaleContainer = document.getElementById('grade-scale');
+            scaleContainer.innerHTML = '';
+
+            if (currentSystem === 'percentage') {
+                scaleContainer.innerHTML = `<div class="grade-item"><div class="grade-letter">Percentage</div><div class="grade-points">0 - 100%</div></div>`;
+            } else if (currentSystem === '10.0-number') {
+                scaleContainer.innerHTML = `<div class="grade-item"><div class="grade-letter">Numeric</div><div class="grade-points">0.0 - 10.0</div></div>`;
+            } else {
+                const scale = gradeScales[currentSystem];
+                for (const [grade, points] of Object.entries(scale)) {
+                    const pointsText = `${points} points`;
+                    scaleContainer.innerHTML += `
+                        <div class="grade-item">
+                            <div class="grade-letter">${grade}</div>
+                            <div class="grade-points">${pointsText}</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function addSemester() {
+            semesterCount++;
+            const semesterId = `semester-${semesterCount}`;
+            const semesterData = {
+                id: semesterId,
+                courses: []
+            };
+            semesters.push(semesterData);
+
+            const semesterHTML = `
+                <div class="semester-section" id="${semesterId}">
+                    <div class="semester-header">
+                        <div class="semester-title">Semester ${semesterCount}</div>
+                        <div class="semester-gpa">SGPA: <span id="${semesterId}-gpa">0.00</span></div>
+                    </div>
+                    <div class="courses-list" id="${semesterId}-courses">
+                        <!-- Courses will be added here -->
+                    </div>
+                    <button class="add-btn" onclick="addCourse('${semesterId}')">+ Add Course</button>
+                </div>
+            `;
+            
+            document.getElementById('semesters-container').insertAdjacentHTML('beforeend', semesterHTML);
+            
+            // Add first course automatically
+            addCourse(semesterId);
+            showToast('Semester added successfully!');
+        }
+
+        function addCourse(semesterId) {
+            const courseId = `${semesterId}-course-${Date.now()}`;
+            const semester = semesters.find(s => s.id === semesterId);
+            semester.courses.push({
+                id: courseId,
+                name: '',
+                credits: 0,
+                grade: ''
+            });
+
+            let gradeInputHTML;
+            if (currentSystem === 'percentage') {
+                gradeInputHTML = `<input type="number" min="0" max="100" step="0.1" placeholder="Enter Percentage" onchange="updateCourse('${courseId}', 'grade', this.value)">`;
+            } else if (currentSystem === '10.0-number') {
+                gradeInputHTML = `<input type="number" min="0" max="10" step="0.5" placeholder="Enter Grade" onchange="updateCourse('${courseId}', 'grade', this.value)">`;
+            } else {
+                const gradeOptions = Object.keys(gradeScales[currentSystem])
+                    .map(grade => `<option value="${grade}">${grade}</option>`)
+                    .join('');
+                gradeInputHTML = `<select onchange="updateCourse('${courseId}', 'grade', this.value)">
+                    <option value="">Select Grade</option>
+                    ${gradeOptions}
+                </select>`;
+            }
+
+            const courseHTML = `
+                <div class="course-row" id="${courseId}">
+                    <div class="input-group">
+                        <input type="text" placeholder="Course Name" onchange="updateCourse('${courseId}', 'name', this.value)">
+                    </div>
+                    <div class="input-group">
+                        <input type="number" min="0.5" max="10" step="0.5" placeholder="Credits" onchange="updateCourse('${courseId}', 'credits', this.value)">
+                    </div>
+                    <div class="input-group">
+                        ${gradeInputHTML}
+                    </div>
+                    <button class="remove-btn" onclick="removeCourse('${courseId}')">×</button>
+                </div>
+            `;
+            
+            document.getElementById(`${semesterId}-courses`).insertAdjacentHTML('beforeend', courseHTML);
+        }
+
+        function updateCourse(courseId, field, value) {
+            for (const semester of semesters) {
+                const course = semester.courses.find(c => c.id === courseId);
+                if (course) {
+                    course[field] = field === 'credits' ? parseFloat(value) || 0 : value;
+                    calculateSemesterGPA(semester.id);
+                    calculateOverallGPA();
+                    saveToLocalStorage();
+                    break;
+                }
+            }
+        }
+
+        function removeCourse(courseId) {
+            for (const semester of semesters) {
+                const courseIndex = semester.courses.findIndex(c => c.id === courseId);
+                if (courseIndex !== -1) {
+                    semester.courses.splice(courseIndex, 1);
+                    document.getElementById(courseId).remove();
+                    calculateSemesterGPA(semester.id);
+                    calculateOverallGPA();
+                    saveToLocalStorage();
+                    break;
+                }
+            }
+        }
+
+        function calculateSemesterGPA(semesterId) {
+            const semester = semesters.find(s => s.id === semesterId);
+            let totalPoints = 0;
+            let totalCredits = 0;
+
+            for (const course of semester.courses) {
+                if (course.grade && course.credits) {
+                    let gradePoint;
+                    if (currentSystem === 'percentage') {
+                        gradePoint = parseFloat(course.grade) / 10 || 0;
+                    } else if (currentSystem === '10.0-number') {
+                        gradePoint = parseFloat(course.grade) || 0;
+                    } else {
+                        gradePoint = gradeScales[currentSystem][course.grade] || 0;
+                    }
+                    totalPoints += gradePoint * course.credits;
+                    totalCredits += course.credits;
+                }
+            }
+
+            let sgpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+            if (currentSystem === 'percentage') {
+                sgpa = sgpa * 10;
+            }
+            
+            document.getElementById(`${semesterId}-gpa`).textContent = sgpa.toFixed(2);
+            return { totalPoints, totalCredits };
+        }
+
+        function calculateOverallGPA() {
+            let totalPoints = 0;
+            let totalCredits = 0;
+
+            for (const semester of semesters) {
+                const { totalPoints: semPoints, totalCredits: semCredits } = calculateSemesterGPA(semester.id);
+                totalPoints += semPoints;
+                totalCredits += semCredits;
+            }
+
+            let overallGPA = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+            if (currentSystem === 'percentage') {
+                overallGPA = overallGPA * 10;
+            }
+
+            document.getElementById('overall-gpa').textContent = overallGPA.toFixed(2);
+            saveToLocalStorage();
+        }
+
+        function updateAllGradeInputs() {
+            document.querySelectorAll('.course-row .input-group:nth-child(3)').forEach(group => {
+                let gradeInputHTML;
+                if (currentSystem === 'percentage') {
+                    gradeInputHTML = `<input type="number" min="0" max="100" step="0.1" placeholder="Enter Percentage" onchange="updateCourse(this.closest('.course-row').id, 'grade', this.value)">`;
+                } else if (currentSystem === '10.0-number') {
+                    gradeInputHTML = `<input type="number" min="0" max="10" step="0.5" placeholder="Enter Grade" onchange="updateCourse(this.closest('.course-row').id, 'grade', this.value)">`;
+                } else {
+                    const gradeOptions = Object.keys(gradeScales[currentSystem])
+                        .map(grade => `<option value="${grade}">${grade}</option>`)
+                        .join('');
+                    gradeInputHTML = `<select onchange="updateCourse(this.closest('.course-row').id, 'grade', this.value)"><option value="">Select Grade</option>${gradeOptions}</select>`;
+                }
+                group.innerHTML = gradeInputHTML;
+            });
+
+            // Reset all course grades when switching systems
+            for (const semester of semesters) {
+                for (const course of semester.courses) {
+                    course.grade = '';
+                }
+            }
+        }
+
+        // Target GPA Calculator
+        function calculateTargetGPA() {
+            const currentGPA = parseFloat(document.getElementById('current-gpa-target').value) || 0;
+            const currentCredits = parseFloat(document.getElementById('current-credits').value) || 0;
+            const targetGPA = parseFloat(document.getElementById('target-gpa').value) || 0;
+            const additionalCredits = parseFloat(document.getElementById('additional-credits').value) || 0;
+
+            const totalCredits = currentCredits + additionalCredits;
+            const targetPoints = targetGPA * totalCredits;
+            const currentPoints = currentGPA * currentCredits;
+            const requiredPoints = targetPoints - currentPoints;
+            const requiredGPA = additionalCredits > 0 ? requiredPoints / additionalCredits : 0;
+
+            let maxGPA;
+            if (currentSystem === '4.0') maxGPA = 4.0;
+            else if (currentSystem.startsWith('10.0')) maxGPA = 10.0;
+            else if (currentSystem === 'percentage') maxGPA = 100;
+
+            const resultDiv = document.getElementById('target-result');
+            const messageDiv = document.getElementById('target-message');
+            resultDiv.style.display = 'block';
+
+            if (requiredGPA > maxGPA) {
+                messageDiv.innerHTML = `<span style="color: var(--danger);">❌ Target GPA is not achievable!</span><br>
+                    The required GPA of ${requiredGPA.toFixed(2)} exceeds the maximum ${maxGPA} scale.`;
+            } else if (requiredGPA < 0) {
+                messageDiv.innerHTML = `<span style="color: var(--success);">✅ Target already achieved!</span><br>
+                    You can maintain a minimum GPA of ${Math.max(0, requiredGPA).toFixed(2)} in future courses.`;
+            } else {
+                messageDiv.innerHTML = `<span style="color: var(--success);">✅ Target is achievable!</span><br>
+                    You need to maintain a GPA of <strong>${requiredGPA.toFixed(2)}</strong> in your next ${additionalCredits} credits.`;
+            }
+        }
+
+        // What-If Analysis
+        function addWhatIfCourse() {
+            const courseId = `whatif-${Date.now()}`;
+            whatIfCourses.push({ id: courseId, credits: 0, grade: '' });
+
+            let gradeInputHTML;
+            if (currentSystem === 'percentage') {
+                gradeInputHTML = `<input type="number" min="0" max="100" step="0.1" placeholder="Enter Percentage" onchange="updateWhatIf('${courseId}', 'grade', this.value)">`;
+            } else if (currentSystem === '10.0-number') {
+                gradeInputHTML = `<input type="number" min="0" max="10" step="0.5" placeholder="Enter Grade" onchange="updateWhatIf('${courseId}', 'grade', this.value)">`;
+            } else {
+                const gradeOptions = Object.keys(gradeScales[currentSystem])
+                    .map(grade => `<option value="${grade}">${grade}</option>`)
+                    .join('');
+                gradeInputHTML = `<select onchange="updateWhatIf('${courseId}', 'grade', this.value)">
+                    <option value="">Select Grade</option>
+                    ${gradeOptions}
+                </select>`;
+            }
+
+            const courseHTML = `
+                <div class="course-row" id="${courseId}" style="margin-bottom: 15px;">
+                    <div class="input-group">
+                        <input type="text" placeholder="Course Name">
+                    </div>
+                    <div class="input-group">
+                        <input type="number" min="0.5" max="10" step="0.5" placeholder="Credits" onchange="updateWhatIf('${courseId}', 'credits', this.value)">
+                    </div>
+                    <div class="input-group">
+                        ${gradeInputHTML}
+                    </div>
+                    <button class="remove-btn" onclick="removeWhatIf('${courseId}')">×</button>
+                </div>
+            `;
+            
+            document.getElementById('what-if-courses').insertAdjacentHTML('beforeend', courseHTML);
+        }
+
+        function updateWhatIf(courseId, field, value) {
+            const course = whatIfCourses.find(c => c.id === courseId);
+            if (course) {
+                course[field] = field === 'credits' ? parseFloat(value) || 0 : value;
+                calculateProjectedGPA();
+            }
+        }
+
+        function removeWhatIf(courseId) {
+            whatIfCourses = whatIfCourses.filter(c => c.id !== courseId);
+            document.getElementById(courseId).remove();
+            calculateProjectedGPA();
+        }
+
+        function calculateProjectedGPA() {
+            let currentPoints = 0;
+            let currentCredits = 0;
+
+            for (const semester of semesters) {
+                const { totalPoints, totalCredits } = calculateSemesterGPA(semester.id);
+                currentPoints += totalPoints;
+                currentCredits += totalCredits;
+            }
+
+            let whatIfPoints = 0;
+            let whatIfCredits = 0;
+
+            for (const course of whatIfCourses) {
+                if (course.grade && course.credits) {
+                    let gradePoint;
+                    if (currentSystem === 'percentage') {
+                        gradePoint = parseFloat(course.grade) / 10 || 0;
+                    } else if (currentSystem === '10.0-number') {
+                        gradePoint = parseFloat(course.grade) || 0;
+                    } else {
+                        gradePoint = gradeScales[currentSystem][course.grade] || 0;
+                    }
+                    whatIfPoints += gradePoint * course.credits;
+                    whatIfCredits += course.credits;
+                }
+            }
+
+            const totalPoints = currentPoints + whatIfPoints;
+            const totalCredits = currentCredits + whatIfCredits;
+            let projectedGPA = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+            
+            if (currentSystem === 'percentage') {
+                projectedGPA = projectedGPA * 10;
+            }
+
+            document.getElementById('projected-gpa').textContent = 
+                `Projected GPA: ${projectedGPA.toFixed(2)}`;
+        }
+
+        function updateWhatIfInputs() {
+            document.querySelectorAll('#what-if-courses .course-row .input-group:nth-child(3)').forEach(group => {
+                let gradeInputHTML;
+                if (currentSystem === 'percentage') {
+                    gradeInputHTML = `<input type="number" min="0" max="100" step="0.1" placeholder="Enter Percentage" onchange="updateWhatIf(this.closest('.course-row').id, 'grade', this.value)">`;
+                } else if (currentSystem === '10.0-number') {
+                    gradeInputHTML = `<input type="number" min="0" max="10" step="0.5" placeholder="Enter Grade" onchange="updateWhatIf(this.closest('.course-row').id, 'grade', this.value)">`;
+                } else {
+                    const gradeOptions = Object.keys(gradeScales[currentSystem])
+                        .map(grade => `<option value="${grade}">${grade}</option>`)
+                        .join('');
+                    gradeInputHTML = `<select onchange="updateWhatIf(this.closest('.course-row').id, 'grade', this.value)"><option value="">Select Grade</option>${gradeOptions}</select>`;
+                }
+                group.innerHTML = gradeInputHTML;
+            });
+            
+            // Reset what-if grades
+            whatIfCourses.forEach(c => c.grade = '');
+        }
+
+        // Grade Converter
+        function updateConversion() {
+            const fromSystem = document.getElementById('from-system').value;
+            const toSystem = document.getElementById('to-system').value;
+            const fromValue = document.getElementById('from-value').value.trim().toUpperCase();
+
+            if (!fromValue) {
+                document.getElementById('converted-value').textContent = '--';
+                return;
+            }
+
+            let convertedValue = '--';
+            let numericFrom = parseFloat(fromValue);
+
+            if (fromSystem === '4.0' && !isNaN(numericFrom)) {
+                if (toSystem === '10.0') {
+                    convertedValue = (numericFrom * 2.5).toFixed(2);
+                } else if (toSystem === 'percentage') {
+                    convertedValue = ((numericFrom / 4.0) * 100).toFixed(1) + '%';
+                } else if (toSystem === 'letter') {
+                    if (numericFrom >= 4.0) convertedValue = 'A+';
+                    else if (numericFrom >= 3.7) convertedValue = 'A-';
+                    else if (numericFrom >= 3.3) convertedValue = 'B+';
+                    else if (numericFrom >= 3.0) convertedValue = 'B';
+                    else if (numericFrom >= 2.7) convertedValue = 'B-';
+                    else if (numericFrom >= 2.3) convertedValue = 'C+';
+                    else if (numericFrom >= 2.0) convertedValue = 'C';
+                    else if (numericFrom >= 1.0) convertedValue = 'D';
+                    else convertedValue = 'F';
+                }
+            } else if (fromSystem === '10.0' && !isNaN(numericFrom)) {
+                if (toSystem === '4.0') {
+                    convertedValue = (numericFrom / 2.5).toFixed(2);
+                } else if (toSystem === 'percentage') {
+                    convertedValue = (numericFrom * 10).toFixed(1) + '%';
+                } else if (toSystem === 'letter') {
+                    if (numericFrom >= 9) convertedValue = 'A+';
+                    else if (numericFrom >= 8.5) convertedValue = 'A-';
+                    else if (numericFrom >= 8) convertedValue = 'B+';
+                    else if (numericFrom >= 7) convertedValue = 'B';
+                    else if (numericFrom >= 6.5) convertedValue = 'B-';
+                    else if (numericFrom >= 6) convertedValue = 'C+';
+                    else if (numericFrom >= 5) convertedValue = 'C';
+                    else if (numericFrom >= 4) convertedValue = 'D';
+                    else convertedValue = 'F';
+                }
+            } else if (fromSystem === 'percentage' && !isNaN(numericFrom)) {
+                if (toSystem === '4.0') {
+                    convertedValue = ((numericFrom / 100) * 4.0).toFixed(2);
+                } else if (toSystem === '10.0') {
+                    convertedValue = (numericFrom / 10).toFixed(2);
+                } else if (toSystem === 'letter') {
+                    if (numericFrom >= 90) convertedValue = 'A+';
+                    else if (numericFrom >= 85) convertedValue = 'A-';
+                    else if (numericFrom >= 80) convertedValue = 'B+';
+                    else if (numericFrom >= 70) convertedValue = 'B';
+                    else if (numericFrom >= 65) convertedValue = 'B-';
+                    else if (numericFrom >= 60) convertedValue = 'C+';
+                    else if (numericFrom >= 50) convertedValue = 'C';
+                    else if (numericFrom >= 40) convertedValue = 'D';
+                    else convertedValue = 'F';
+                }
+            } else if (fromSystem === 'letter') {
+                const letterMap = {
+                    'A+': { '4.0': 4.0, '10.0': 10, 'percentage': '95%' },
+                    'A': { '4.0': 4.0, '10.0': 9, 'percentage': '90%' },
+                    'A-': { '4.0': 3.7, '10.0': 8.5, 'percentage': '87%' },
+                    'B+': { '4.0': 3.3, '10.0': 8, 'percentage': '83%' },
+                    'B': { '4.0': 3.0, '10.0': 7, 'percentage': '75%' },
+                    'B-': { '4.0': 2.7, '10.0': 6.5, 'percentage': '70%' },
+                    'C+': { '4.0': 2.3, '10.0': 6, 'percentage': '67%' },
+                    'C': { '4.0': 2.0, '10.0': 5, 'percentage': '60%' },
+                    'D': { '4.0': 1.0, '10.0': 4, 'percentage': '50%' },
+                    'F': { '4.0': 0, '10.0': 0, 'percentage': '0%' }
+                };
+                
+                if (letterMap[fromValue] && letterMap[fromValue][toSystem]) {
+                    convertedValue = letterMap[fromValue][toSystem];
+                }
+            }
+
+            document.getElementById('converted-value').textContent = convertedValue;
+        }
+
+        function populateConversionTable() {
+            const tableBody = document.getElementById('conversion-table');
+            tableBody.innerHTML = '';
+            
+            conversionTable.forEach(row => {
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 10px;">${row.letter}</td>
+                        <td style="padding: 10px; text-align: center;">${row.fourScale}</td>
+                        <td style="padding: 10px; text-align: center;">${row.tenScale}</td>
+                        <td style="padding: 10px; text-align: center;">${row.percentage}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Analytics
+        function updateAnalytics() {
+            let totalCredits = 0;
+            let semesterGPAs = [];
+            let gradeCount = {};
+
+            for (const semester of semesters) {
+                let semCredits = 0;
+                let semPoints = 0;
+                
+                for (const course of semester.courses) {
+                    if (course.grade && course.credits) {
+                        totalCredits += course.credits;
+                        semCredits += course.credits;
+                        gradeCount[course.grade] = (gradeCount[course.grade] || 0) + 1;
+                        
+                        let gradePoint;
+                        if (currentSystem === 'percentage') {
+                            gradePoint = parseFloat(course.grade) / 10 || 0;
+                        } else if (currentSystem === '10.0-number') {
+                            gradePoint = parseFloat(course.grade) || 0;
+                        } else {
+                            gradePoint = gradeScales[currentSystem][course.grade] || 0;
+                        }
+                        semPoints += gradePoint * course.credits;
+                    }
+                }
+                
+                if (semCredits > 0) {
+                    let sgpa = semPoints / semCredits;
+                    if (currentSystem === 'percentage') {
+                        sgpa = sgpa * 10;
+                    }
+                    semesterGPAs.push(sgpa);
+                }
+            }
+
+            document.getElementById('total-credits').textContent = totalCredits;
+            document.getElementById('avg-credits').textContent = 
+                semesters.length > 0 ? Math.round(totalCredits / semesters.length) : 0;
+
+            if (semesterGPAs.length > 0) {
+                const bestGPA = Math.max(...semesterGPAs);
+                const bestSemIndex = semesterGPAs.indexOf(bestGPA) + 1;
+                document.getElementById('best-sem').textContent = `Sem ${bestSemIndex}`;
+                
+                if (semesterGPAs.length > 1) {
+                    const trend = semesterGPAs[semesterGPAs.length - 1] > semesterGPAs[0] ? '📈' : '📉';
+                    document.getElementById('grade-trend').textContent = trend;
+                }
+            }
+
+            // Grade distribution
+            const distributionDiv = document.getElementById('grade-distribution');
+            distributionDiv.innerHTML = '';
+            
+            for (const [grade, count] of Object.entries(gradeCount)) {
+                const percentage = ((count / Object.values(gradeCount).reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                distributionDiv.innerHTML += `
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <span style="width: 60px; font-weight: 600;">${grade}:</span>
+                        <div style="flex: 1; background: var(--border); border-radius: 4px; height: 20px; margin: 0 10px;">
+                            <div style="background: var(--primary); width: ${percentage}%; height: 100%; border-radius: 4px;"></div>
+                        </div>
+                        <span style="width: 50px; text-align: right;">${percentage}%</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            
+            let bgColor = 'var(--success)';
+            if (type === 'warning') bgColor = 'var(--warning)';
+            else if (type === 'danger') bgColor = 'var(--danger)';
+            
+            toast.style.background = bgColor;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function saveToLocalStorage() {
+            const data = {
+                system: currentSystem,
+                semesters: semesters,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('gpaCalculatorData', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('gpaCalculatorData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentSystem = data.system;
+                    
+                    // Update the active toggle button
+                    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                    const activeBtn = Array.from(document.querySelectorAll('.toggle-btn')).find(btn => 
+                        btn.textContent.includes(currentSystem === '4.0' ? '4.0' : 
+                                                currentSystem === '10.0-letter' ? '10.0 Scale (Letters)' :
+                                                currentSystem === '10.0-number' ? '10.0 Scale (Numbers)' : 'Percentage'));
+                    if (activeBtn) {
+                        activeBtn.classList.add('active');
+                        switchSystem(activeBtn, currentSystem);
+                    }
+                    
+                    // Clear existing data
+                    semesters = [];
+                    semesterCount = 0;
+                    document.getElementById('semesters-container').innerHTML = '';
+                    
+                    // Load saved semesters
+                    data.semesters.forEach((sem, index) => {
+                        semesterCount++;
+                        const semesterId = `semester-${semesterCount}`;
+                        sem.id = semesterId;
+                        
+                        // Update course IDs to prevent conflicts
+                        sem.courses.forEach((course, courseIndex) => {
+                            course.id = `${semesterId}-course-${Date.now() + courseIndex}`;
+                        });
+                        
+                        semesters.push(sem);
+                        
+                        // Create semester HTML
+                        let coursesHTML = '';
+                        sem.courses.forEach(course => {
+                            let gradeInputHTML;
+                            let selectedValue = course.grade;
+                            
+                            if (currentSystem === 'percentage') {
+                                gradeInputHTML = `<input type="number" min="0" max="100" step="0.1" value="${selectedValue}" placeholder="Enter Percentage" onchange="updateCourse('${course.id}', 'grade', this.value)">`;
+                            } else if (currentSystem === '10.0-number') {
+                                gradeInputHTML = `<input type="number" min="0" max="10" step="0.5" value="${selectedValue}" placeholder="Enter Grade" onchange="updateCourse('${course.id}', 'grade', this.value)">`;
+                            } else {
+                                const gradeOptions = Object.keys(gradeScales[currentSystem])
+                                    .map(grade => `<option value="${grade}" ${grade === selectedValue ? 'selected' : ''}>${grade}</option>`)
+                                    .join('');
+                                gradeInputHTML = `<select onchange="updateCourse('${course.id}', 'grade', this.value)">
+                                    <option value="">Select Grade</option>
+                                    ${gradeOptions}
+                                </select>`;
+                            }
+                            
+                            coursesHTML += `
+                                <div class="course-row" id="${course.id}">
+                                    <div class="input-group">
+                                        <input type="text" placeholder="Course Name" value="${course.name}" onchange="updateCourse('${course.id}', 'name', this.value)">
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="number" min="0.5" max="10" step="0.5" value="${course.credits}" placeholder="Credits" onchange="updateCourse('${course.id}', 'credits', this.value)">
+                                    </div>
+                                    <div class="input-group">
+                                        ${gradeInputHTML}
+                                    </div>
+                                    <button class="remove-btn" onclick="removeCourse('${course.id}')">×</button>
+                                </div>
+                            `;
+                        });
+                        
+                        const semesterHTML = `
+                            <div class="semester-section" id="${semesterId}">
+                                <div class="semester-header">
+                                    <div class="semester-title">Semester ${semesterCount}</div>
+                                    <div class="semester-gpa">SGPA: <span id="${semesterId}-gpa">0.00</span></div>
+                                </div>
+                                <div class="courses-list" id="${semesterId}-courses">
+                                    ${coursesHTML}
+                                </div>
+                                <button class="add-btn" onclick="addCourse('${semesterId}')">+ Add Course</button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('semesters-container').insertAdjacentHTML('beforeend', semesterHTML);
+                    });
+                    
+                    calculateOverallGPA();
+                    showToast('Data loaded successfully!');
+                    
+                } catch (error) {
+                    showToast('Error loading saved data!', 'danger');
+                    console.error('Error loading data:', error);
+                }
+            } else {
+                showToast('No saved data found!', 'warning');
+            }
+        }
+
+        function saveCalculation() {
+            saveToLocalStorage();
+            showToast('Calculation saved!');
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                localStorage.removeItem('gpaCalculatorData');
+                semesters = [];
+                semesterCount = 0;
+                document.getElementById('semesters-container').innerHTML = '';
+                calculateOverallGPA();
+                
+                // Reset what-if courses
+                whatIfCourses = [];
+                document.getElementById('what-if-courses').innerHTML = '';
+                calculateProjectedGPA();
+                
+                showToast('All data reset!');
+            }
+        }
+
+        // Initialize the app
+        window.addEventListener('load', function() {
+            updateGradeScale();
+            // Try to load saved data on startup
+            const saved = localStorage.getItem('gpaCalculatorData');
+            if (saved) {
+                loadFromLocalStorage();
+            } else {
+                // Add a default semester to get started
+                addSemester();
+            }
+        });
+    </script>
+</body>
+</html>
